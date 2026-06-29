@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: fake-news-detection
+    env: docker
+    plan: free
+    healthCheckPath: /api/health

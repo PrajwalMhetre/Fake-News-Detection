@@ -1,0 +1,17 @@
+.DS_Store
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+
+backend/data/*.csv
+!backend/data/.gitkeep

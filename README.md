@@ -1,270 +1,89 @@
-# 📰 AI Fake News Detection System
+# Fake News Detection
 
-An end-to-end AI-powered Fake News Detection web application that uses Natural Language Processing (NLP) and Machine Learning to classify news articles as **Fake** or **Real**.
+A deployable full-stack fake-news detection app with a FastAPI backend and a React/Vite frontend. The API loads `backend/model/model.pkl` and `backend/model/vectorizer.pkl` when valid artifacts are present, and falls back to a transparent heuristic classifier when they are missing or empty.
 
-![Python](https://img.shields.io/badge/Python-3.11-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
-![React](https://img.shields.io/badge/React-Frontend-blue)
-![Scikit-learn](https://img.shields.io/badge/Scikit--Learn-ML-orange)
-![Docker](https://img.shields.io/badge/Docker-Container-blue)
+## What is included
 
----
+- FastAPI API at `/api`
+- Legacy API aliases at `/predict`, `/history`, and `/health`
+- React dashboard for article analysis and session history
+- Dockerfile for single-container deployment
+- Docker Compose for local production testing
+- GitHub Actions workflow for tests, frontend build, and Docker build
+- Optional training script for CSV datasets
 
-## 🚀 Features
-
-- Upload or paste news articles
-- AI-powered Fake/Real prediction
-- Confidence score
-- NLP preprocessing
-- Prediction history
-- Interactive dashboard
-- REST API
-- Docker support
-- Responsive UI
-- Easy deployment
-
----
-
-## 🏗️ Tech Stack
-
-### Frontend
-- React.js
-- Tailwind CSS
-- Axios
-
-### Backend
-- FastAPI
-- Python
-
-### Machine Learning
-- Scikit-learn
-- Pandas
-- NumPy
-- TF-IDF Vectorizer
-- Logistic Regression
-
-### Database
-- SQLite
-
-### DevOps
-- Docker
-- GitHub Actions
-
----
-
-## 📂 Project Structure
-
-```
-fake-news-detector/
-│
-├── frontend/
-│   ├── src/
-│   ├── public/
-│   └── package.json
-│
-├── backend/
-│   ├── app.py
-│   ├── predict.py
-│   ├── train.py
-│   ├── requirements.txt
-│   └── model.pkl
-│
-├── dataset/
-│   ├── Fake.csv
-│   └── True.csv
-│
-├── screenshots/
-├── Dockerfile
-├── docker-compose.yml
-├── README.md
-└── LICENSE
-```
-
----
-
-## ⚙️ Installation
-
-### Clone Repository
-
-```bash
-git clone https://github.com/yourusername/fake-news-detector.git
-
-cd fake-news-detector
-```
+## Run locally
 
 ### Backend
 
 ```bash
-cd backend
-
-pip install -r requirements.txt
-
-python train.py
-
-uvicorn app:app --reload
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+uvicorn backend.app.main:app --reload
 ```
+
+The API runs on `http://127.0.0.1:8000`.
 
 ### Frontend
 
 ```bash
 cd frontend
-
 npm install
-
 npm run dev
 ```
 
----
+The frontend runs on `http://127.0.0.1:5173` and proxies API calls to the backend.
 
-## 🧠 Model Training
-
-```bash
-python train.py
-```
-
-The model is trained using:
-
-- TF-IDF Vectorization
-- Logistic Regression
-
-Model is saved as
-
-```
-model.pkl
-```
-
----
-
-## 📡 API Endpoints
-
-### Predict News
-
-```
-POST /predict
-```
-
-Request
-
-```json
-{
-    "text":"Paste news article here"
-}
-```
-
-Response
-
-```json
-{
-    "prediction":"Fake",
-    "confidence":"98.12%"
-}
-```
-
----
-
-### History
-
-```
-GET /history
-```
-
----
-
-### Health Check
-
-```
-GET /health
-```
-
----
-
-## 🖥️ Screenshots
-
-Add screenshots here.
-
-- Home Page
-- Prediction Page
-- Dashboard
-- History
-
----
-
-## 📊 Dataset
-
-Fake and Real News Dataset
-
-Contains
-
-- Fake.csv
-- True.csv
-
----
-
-## 📈 Future Improvements
-
-- BERT Model
-- Explainable AI (SHAP/LIME)
-- URL verification
-- Browser Extension
-- Multi-language support
-- User Authentication
-- News Source Credibility Score
-- Live News API Integration
-
----
-
-## 🐳 Docker
-
-Build
+## Production with Docker
 
 ```bash
-docker build -t fake-news .
+docker build -t fake-news-detection .
+docker run --rm -p 8000:8000 fake-news-detection
 ```
 
-Run
+Open `http://127.0.0.1:8000`. The same FastAPI process serves both the API and the built frontend.
+
+With Compose:
 
 ```bash
-docker run -p 8000:8000 fake-news
+docker compose up --build
 ```
 
----
+## API
 
-## ☁️ Deployment
+```bash
+curl http://127.0.0.1:8000/api/health
+```
 
-Frontend
+```bash
+curl -X POST http://127.0.0.1:8000/api/predict \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Officials said public records were reviewed by researchers before publication."}'
+```
 
-- Vercel
+## Training a model
 
-Backend
+Add one of the following dataset layouts:
 
-- Render
+- `backend/data/Fake.csv` and `backend/data/True.csv`
+- `backend/data/news.csv` with `text` or `content` and `label` columns
 
-Database
+Then run:
 
-- SQLite / PostgreSQL
+```bash
+python -m backend.app.models.train
+```
 
----
+The script writes:
 
-## 👨‍💻 Author
+- `backend/model/model.pkl`
+- `backend/model/vectorizer.pkl`
 
-**Prajwal Mhetre**
+## Deployment notes
 
-B.Tech Electronics & Communication Engineering
-
-GitHub:
-https://github.com/PrajwalMhetre
-
-LinkedIn:
-https://www.linkedin.com/in/prajwalmhetre
-
----
-
-## ⭐ Support
-
-If you found this project useful, please consider giving it a ⭐ on GitHub.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
+- Docker hosts can use the included `Dockerfile`.
+- Render can use `render.yaml`.
+- Heroku-style hosts can use the included `Procfile`.
+- Set `CORS_ORIGINS` to a comma-separated allowlist if the frontend is served from a different domain.
+- Set `PORT` when your platform requires a specific runtime port.
